@@ -3,6 +3,7 @@ package me.toxz.school.encryption;
 
 import sun.security.util.BitArray;
 
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class SBox {
     }
 
     private byte[] apply(byte[] origin, Map<Byte, Byte> table) {
+        new BitArray(origin.length * 2, origin);
         byte[] re = new byte[origin.length];
         for (int i = 0; i < origin.length; i++) {
             re[i] = table.get(origin[i]);
