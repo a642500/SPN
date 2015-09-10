@@ -10,31 +10,18 @@ import java.util.*;
 public class SPN {
     private Padding mPadding = null;
 
-    /**
-     * swipe value with index
-     */
-    @Deprecated
-    public static byte[] inverse(byte[] bytes) {
-        byte[] inversed = new byte[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-
-            int value = 2 * i + 1;
-            int index = (bytes[i] & 0x0f) / 2;
-            int high = (bytes[i] & 0x0f) % 2;
-            inversed[index] += value << high;
-
-            value = 2 * i;
-            index = ((bytes[i] & 0xf0) >> 4) / 2;
-            high = ((bytes[i] & 0xf0) >> 4) % 2;
-            inversed[index] += value << high;
-        }
-        return inversed;
-    }
-
     public static <T, K> Map<K, T> inverse(Map<T, K> origin) {
         HashMap<K, T> map = new HashMap<>(origin.size());
         origin.forEach((t, k) -> map.put(k, t));
         return map;
+    }
+
+    public static int[] inverse(int[] ints) {
+        int[] re = new int[ints.length];
+        for (int i = 0; i < ints.length; i++) {
+            re[ints[i]] = i;
+        }
+        return re;
     }
 
     public static int printByte(byte b) {

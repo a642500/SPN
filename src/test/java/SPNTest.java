@@ -22,7 +22,7 @@ public class SPNTest {
     public static final byte[] KEY_SAMPLE = new byte[]{
             0x3a, (byte) 0x94, (byte) 0xd6, 0x3f
     };
-    public static final byte[] PBOX_SAMPLE = new byte[]{
+    public static final int[] PBOX_SAMPLE = new int[]{
             0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf
     };
 
@@ -37,9 +37,13 @@ public class SPNTest {
     @Before
     public void setSPN() {
         mSPN = new SPN();
+        mSBox = new SBox(SBOX_SAMPLE);
+        mPBox = new PBox(PBOX_SAMPLE);
     }
 
     private SPN mSPN;
+    private SBox mSBox;
+    private PBox mPBox;
 
 
     @Test
@@ -49,33 +53,26 @@ public class SPNTest {
         }, mSPN.xorKey(KEY_SAMPLE, ORIGIN_SAMPLE));
     }
 
+    private byte[] getU1() {
+        return mSPN.xorKey(KEY_SAMPLE, ORIGIN_SAMPLE);
+    }
+
+    private byte[] getV1() {
+        return mSBox.encode(getU1());
+    }
+
     @Test
     public void testSBox() {
-        SBox sBox = new SBox(SBOX_SAMPLE);
-        byte[] u1 = mSPN.xorKey(KEY_SAMPLE, ORIGIN_SAMPLE);
-        byte[] v1 = sBox.encode(u1);
+        byte[] v1 = getV1();
 
         assertArrayEquals(new byte[]{0x45, (byte) 0xd1}, v1);
-        assertArrayEquals(u1, sBox.decode(v1));
+        assertArrayEquals(getU1(), mSBox.decode(v1));
     }
 
     @Test
     public void testPBox() {
-        PBox pBox = new PBox(PBOX_SAMPLE);
-
-        SBox sBox = new SBox(SBOX_SAMPLE);
-        byte[] k1 = Arrays.copyOf(KEY_SAMPLE, 4);
-        byte[] u1 = new byte[ORIGIN_SAMPLE.length];
-        for (int i = 0; i < ORIGIN_SAMPLE.length; i++) {
-            byte b = ORIGIN_SAMPLE[i];
-            u1[i] = (byte) (b ^ k1[i % 4]);
-
-        }
-        byte[] v1 = sBox.encode(u1);
-        byte[] w1 = pBox.encode(v1);
-
-        assertArrayEquals(new byte[]{
-                0x2, 0xe, 0x0, 0x7
-        }, w1);
+        byte[] w1 = mPBox.encode(getV1());
+        assertArrayEquals(new byte[]{0x2e, 0x07}, w1);
+        assertArrayEquals(getV1(), mPBox.decode(w1));
     }
 }
