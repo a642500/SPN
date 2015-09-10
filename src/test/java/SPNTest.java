@@ -15,32 +15,33 @@ public class SPNTest {
             0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7
     };
     public static final byte[] X_SAMPLE = new byte[]{
-            0x2, 0x6, 0xb, 0x7
+            0x26, (byte) 0xb7
     };
     public static final byte[] K_SAMPLE = new byte[]{
-            0x3, 0xa, 0x9, 0x4, 0xd, 0x6, 0x3, 0xf
+            0x3a, (byte) 0x94, (byte) 0xd6, 0x3f
     };
     public static final byte[] PBOX_SAMPLE = new byte[]{
             0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf
     };
 
+
     @Test
     public void testSBox() {
         SBox sBox = new SBox(SBOX_SAMPLE);
-        byte[] k1 = Arrays.copyOf(K_SAMPLE, 4);
+        byte[] k1 = Arrays.copyOf(K_SAMPLE, 2);
         byte[] u1 = new byte[X_SAMPLE.length];
         for (int i = 0; i < X_SAMPLE.length; i++) {
             byte b = X_SAMPLE[i];
-            u1[i] = (byte) (b ^ k1[i % 4]);
+            u1[i] = (byte) (b ^ k1[i % 2]);
 
         }
         assertArrayEquals(new byte[]{
-                0x1, 0xc, 0x2, 0x3
+                0x1c, 0x23
         }, u1);
 
         byte[] v1 = sBox.encode(u1);
         assertArrayEquals(new byte[]{
-                0x4, 0x5, 0xd, 0x1
+                0x45, (byte) 0xd1
         }, v1);
 
         assertArrayEquals(u1, sBox.decode(v1));

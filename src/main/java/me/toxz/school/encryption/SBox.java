@@ -1,38 +1,50 @@
 package me.toxz.school.encryption;
 
-import com.sun.istack.internal.NotNull;
+
+import sun.security.util.BitArray;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Carlos on 2015/9/1.
  */
 public class SBox {
-    private final byte[] pi;
-    private final byte[] inversePi;
+    private final Map<Byte, Byte> pi;
+    private final Map<Byte, Byte> inversePi;
+    private final int LENGTH;
 
-
-    public SBox(@NotNull byte[] bytes) {
-        if (bytes.length != 16) {
-            throw new IllegalArgumentException("You must provide bytes whose length is 16 ");
+    public Map<Byte, Byte> createMap(byte[] bytes) {
+        Map<Byte, Byte> map = new HashMap<>(LENGTH * LENGTH);
+        for (int i = 0; i < LENGTH; i++) {
+            for (int j = 0; j < LENGTH; j++) {
+                byte key = (byte) (i ^ j << 4);
+                byte value = (byte) (bytes[i] ^ bytes[j] << 4);
+                map.put(key, value);
+            }
         }
-        this.pi = bytes;
+        return map;
+    }
+
+    public SBox(byte[] bytes) {
+        LENGTH = bytes.length;
+        this.pi = createMap(bytes);
         inversePi = SPN.inverse(pi);
     }
 
 
     public byte[] encode(byte[] bytes) {
-        byte[] re = new byte[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            int index = bytes[i];
-            re[i] = pi[index];
-        }
-        return re;
+        return apply(bytes, pi);
     }
 
     public byte[] decode(byte[] bytes) {
-        byte[] re = new byte[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            int index = bytes[i];
-            re[i] = inversePi[index];
+        return apply(bytes, inversePi);
+    }
+
+    private byte[] apply(byte[] origin, Map<Byte, Byte> table) {
+        byte[] re = new byte[origin.length];
+        for (int i = 0; i < origin.length; i++) {
+            re[i] = table.get(origin[i]);
         }
         return re;
     }

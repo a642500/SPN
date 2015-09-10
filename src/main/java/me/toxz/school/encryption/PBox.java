@@ -1,6 +1,5 @@
 package me.toxz.school.encryption;
 
-import com.sun.istack.internal.NotNull;
 
 import java.util.Arrays;
 
@@ -14,9 +13,9 @@ public class PBox {
     private final byte[] pi;
     private final byte[] inversePi;
 
-    public PBox(@NotNull byte[] bytes) {
-        if (bytes.length != 16) {
-            throw new IllegalArgumentException("You must provide bytes whose length is 16 ");
+    public PBox(byte[] bytes) {
+        if (bytes.length != 8) {
+            throw new IllegalArgumentException("You must provide bytes whose length is 8 ");
         }
         this.pi = bytes;
         this.inversePi = SPN.inverse(pi);
@@ -24,18 +23,20 @@ public class PBox {
 
     public byte[] encode(byte[] bytes) {
         byte[] re = new byte[bytes.length];
-        short[] parts = new short[bytes.length / 4];
-        for (int i = 0; i < bytes.length; i++) {
-            parts[i] = Short.valueOf(new String(Arrays.copyOfRange(bytes, i * 4, i * 4 + 4)));
+        short[] parts = new short[bytes.length / 2];
+        for (int i = 0; i < parts.length; i++) {
+            for (int j = 0; j < 2; j++) {
+                parts[i] += bytes[2 * i + j] & (0x0f << (j * 4)) << 4 * j;
+            }
         }
-        short[] reShort = new short[bytes.length / 4];
         for (int i = 0; i < parts.length; i++) {
             short part = parts[i];
             short rePart = 0;
             for (int j = 0; j < 16; j++) {
                 rePart += ((part & (2 ^ j)) >> ((int) pi[j]) - j);
             }
-            reShort[i] = rePart;
+            re[i * 2] = (byte) (rePart & 0xf);
+            re[i * 2 + 1] = (byte) (rePart & 0xf0);
         }
         return re;
     }
