@@ -36,9 +36,9 @@ public class SPNTest {
 
     @Before
     public void setSPN() {
-        mSPN = new SPN();
         mSBox = new SBox(SBOX_SAMPLE);
         mPBox = new PBox(PBOX_SAMPLE);
+        mSPN = new SPN(mSBox, mPBox);
     }
 
     private SPN mSPN;
@@ -74,5 +74,12 @@ public class SPNTest {
         byte[] w1 = mPBox.encode(getV1());
         assertArrayEquals(new byte[]{0x2e, 0x07}, w1);
         assertArrayEquals(getV1(), mPBox.decode(w1));
+    }
+
+    @Test
+    public void testSPN() {
+        byte[] y = mSPN.encode(KEY_SAMPLE, ORIGIN_SAMPLE);
+
+        assertArrayEquals(new byte[]{(byte) 0xbc, (byte) 0xd6}, y);
     }
 }
