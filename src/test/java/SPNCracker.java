@@ -72,6 +72,56 @@ public class SPNCracker {
 
     @Test
     public void tryLinearAnalysis() throws IOException, ClassNotFoundException {
+        analysis((or, u42, u44) ->
+                (((or[1] >> 3) & 0x1)
+                        ^ (((or[1]) >> 1) & 0x1)
+                        ^ (or[1] & 0x1)
+                        ^ ((u42 >> 2) & 0x1)
+                        ^ (u42 & 0x1)
+                        ^ ((u44 >> 2) & 0x1)
+                        ^ (u44 & 0x1)) == 0
+        );
+    }
+
+    private int[] bruteForce(int[] result, SPN spn, Pair<byte[], byte[]> anyPair) {
+
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                for (int k = 0; k < 16; k++) {
+                    for (int l = 0; l < 16; l++) {
+                        for (int m = 0; m < 16; m++) {
+                            for (int n = 0; n < 16; n++) {
+                                result[0] = i;
+                                result[1] = j;
+                                result[2] = k;
+                                result[3] = l;
+                                result[4] = m;
+                                result[6] = n;
+
+                                if (spn.encode(toByteArray(result), anyPair.first) == anyPair.second)
+                                    return result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void tryDifferentialCryptanalysis() throws IOException, ClassNotFoundException {
+        analysis((or, u42, u44) ->
+                (((or[1] >> 3) & 0x1)
+                        ^ (((or[1]) >> 1) & 0x1)
+                        ^ (or[1] & 0x1)
+                        ^ ((u42 >> 2) & 0x1)
+                        ^ (u42 & 0x1)
+                        ^ ((u44 >> 2) & 0x1)
+                        ^ (u44 & 0x1)) == 0);
+    }
+
+    private void analysis(Analyser analyser) throws IOException, ClassNotFoundException {
         int[][] countL1L2 = new int[16][16];
         int[] result = new int[8];
         int[] maxKey = new int[2];
@@ -91,13 +141,7 @@ public class SPNCracker {
                     u42 = SBox_C[v42];
                     u44 = SBox_C[v44];
 
-                    if ((((expandToIntArray(pair.second)[1] >> 3) & 0x1)
-                            ^ (((expandToIntArray(pair.second)[1]) >> 1) & 0x1)
-                            ^ (expandToIntArray(pair.second)[1] & 0x1)
-                            ^ ((u42 >> 2) & 0x1)
-                            ^ (u42 & 0x1)
-                            ^ ((u44 >> 2) & 0x1)
-                            ^ (u44 & 0x1)) == 0) {
+                    if ((analyser.isCount(expandToIntArray(pair.second), u42, u44))) {
                         countL1L2[j][k] += 1;
                     }
 
@@ -127,30 +171,8 @@ public class SPNCracker {
         Assert.assertNotNull(bruteForce(result, mSpn, list.get(0)));
     }
 
-    private int[] bruteForce(int[] result, SPN spn, Pair<byte[], byte[]> anyPair) {
-
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                for (int k = 0; k < 16; k++) {
-                    for (int l = 0; l < 16; l++) {
-                        for (int m = 0; m < 16; m++) {
-                            for (int n = 0; n < 16; n++) {
-                                result[0] = i;
-                                result[1] = j;
-                                result[2] = k;
-                                result[3] = l;
-                                result[4] = m;
-                                result[6] = n;
-
-                                if (spn.encode(toByteArray(result), anyPair.first) == anyPair.second)
-                                    return result;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return null;
+    public interface Analyser {
+        boolean isCount(int[] or, int u42, int u44);
     }
 
 }
