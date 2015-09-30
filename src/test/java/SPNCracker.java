@@ -15,12 +15,14 @@ import java.util.Random;
  * Created by Carlos on 2015/9/29.
  */
 public class SPNCracker {
-    private File mFile;
     public static final String TEST_FILE = "/home/carlos/tmp/test.spn";
     public static final int KEY_COUNT = 10000;
     public static final byte[] SBOX_KEY = new byte[]{};
     public static final int[] PBOX_KEY = new int[]{};
     public static final byte[] KEY = new byte[]{};
+    private static final int[] SBox_C = {0xe, 0x3, 0x4, 0x8, 0x1, 0xc, 0xa, 0xf, 0x7, 0xd, 0x9, 0x6, 0xb, 0x2, 0x0, 0x5};
+    private static final int[] SBOX_ORIGIN = {0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7};
+    private File mFile;
     private SPN mSpn;
 
     @Before
@@ -59,16 +61,20 @@ public class SPNCracker {
     }
 
     private int[] expandToIntArray(byte[] b) {
-
+        int[] re = new int[b.length];
+        for (int i = 0; i < re.length; i++) {
+            re[i] = b[i];
+        }
+        return re;
     }
 
     private byte[] toByteArray(int[] b) {
-
+        byte[] re = new byte[b.length];
+        for (int i = 0; i < re.length; i++) {
+            re[i] = (byte) b[i];
+        }
+        return re;
     }
-
-    private static final int[] SBox_C = {0xe, 0x3, 0x4, 0x8, 0x1, 0xc, 0xa, 0xf, 0x7, 0xd, 0x9, 0x6, 0xb, 0x2, 0x0, 0x5};
-    private static final int[] SBOX_ORIGIN = {0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7};
-
 
     @Test
     public void tryLinearAnalysis() throws IOException, ClassNotFoundException {

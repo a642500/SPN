@@ -3,7 +3,6 @@ package me.toxz.school.encryption;
 import com.sun.istack.internal.NotNull;
 import sun.security.util.BitArray;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
